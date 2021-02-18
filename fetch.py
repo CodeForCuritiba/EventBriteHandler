@@ -55,7 +55,7 @@ def get_info_from_eventbrite(only_today=True):
 
 
 def report_to_telegram(chat_id=None, report=None):
-    telegram_token = os.environ.get('TELEGRAM_TOKEN', None)
+    telegram_token = os.environ.get('TELEGRAM_TOKEN_ID', None)
     telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID', None)
 
     event_day = date(month=3, day=6, year=2021)
