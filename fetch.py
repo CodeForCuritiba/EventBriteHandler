@@ -5,9 +5,17 @@ from functools import reduce
 from pprint import PrettyPrinter
 
 from eventbrite import Eventbrite
+import telebot
 
 
-def get_info(token_id, event_id, only_today=True):
+def get_info_from_eventbrite(only_today=True):
+    token_id = os.environ.get('TOKEN_ID', None)
+    event_id = os.environ.get('EVENT_ID', None)
+
+    if token_id is None or event_id is None:
+        print('Env var TOKEN_ID and EVENT_ID must be set before running this app.')
+        exit(1)
+
     evtb = Eventbrite(token_id)
 
     print(" -> Getting information about the event...")
@@ -46,20 +54,58 @@ def get_info(token_id, event_id, only_today=True):
     return summary
 
 
-def main(token_id, event_id):
-    print("Code for Curitiba - EventBrite conenctor")
-    event_summary = get_info(token_id, event_id)
+def report_to_telegram(chat_id=None, report=None):
+    telegram_token = os.environ.get('TELEGRAM_TOKEN', None)
+    telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID', None)
 
+    event_day = date(month=3, day=6, year=2021)
+    today = date.today()
+
+    days_left = event_day - today
+
+    msg_days_left = ''
+    attendees_msg = ''
+
+    if days_left.days >= 1:
+        msg_days_left = f"🔥 Faltam <b>{days_left.days}</b> dia(s) para o evento!\n\n"
+        attendees_msg = f"📈 Ultimos cadastros de hoje: <b>{report['attendee_summary']['object_count']}</b>\n<pre>"
+
+        for detail in report['latest_attendee_list']:
+            attendees_msg += f"- {detail['name']} - {detail['company']}\n" \
+
+        attendees_msg += '</pre>\n'
+
+        if report['attendee_summary']['has_more_items']:
+            attendees_msg += "E <b>muitos outros</b>!"
+
+    bot = telebot.TeleBot(token=telegram_token, parse_mode='HTML')
+
+    message = f"📰 Boletim do evento OpenData Day 2021!\n\n{msg_days_left}" \
+              f"🔩 <b>Até agora vendemos {report['total_sold']} Ingresso(s)</b> \n{attendees_msg}"
+
+    bot.send_message(chat_id=telegram_chat_id, text=message)
+    print('Message sent to Telegram!')
+
+    return bot.get_updates()
+
+
+def main():
     pp = PrettyPrinter()
+
+    print("Code for Curitiba - EventBrite connector")
+
+    print(" -> Summary")
+    event_summary = get_info_from_eventbrite()
     pp.pprint(event_summary)
+
+    print(" -> Telegram report")
+
+    updates = report_to_telegram(report=event_summary)
+    for item in updates:
+        pp.pprint(item)
+
+    print("Done")
 
 
 if __name__ == '__main__':
-    token_id = os.environ.get('TOKEN_ID', None)
-    event_id = os.environ.get('EVENT_ID', None)
-
-    if token_id is None or event_id is None:
-        print('Env var TOKEN_ID and EVENT_ID must be set before running this app.')
-        exit(1)
-
-    main(token_id, event_id)
+    main()

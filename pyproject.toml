@@ -8,6 +8,7 @@ license = "GPLv3"
 [tool.poetry.dependencies]
 python = "^3.9"
 eventbrite = "^3.3.5"
+pyTelegramBotAPI = "^3.7.6"
 
 [tool.poetry.dev-dependencies]
 
