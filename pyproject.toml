@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "EventBriteCode"
+version = "0.1.0"
+description = "Simple project for get in touch with Eventbrite's API and get info about Code4CWB events"
+authors = ["Jonhnatha Trigueiro <joepreludian@gmail.com>"]
+license = "GPLv3"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+eventbrite = "^3.3.5"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
