@@ -5,7 +5,7 @@ pipeline {
         docker { image 'joepreludian/python-poetry:latest' }
     }
     triggers {
-        cron('10 0 * * *')
+        cron('*/15 * * * *')
     }
     stages {
         stage('Run') {
